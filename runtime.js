@@ -146,16 +146,11 @@ cr.plugins_.SpinePlugin = function(runtime)
 						
 						var dt = instance.runtime.getDt(this);
 
-						instance.extra.refresh = instance.extra.refresh + dt; // add dt every tick, then refresh = 1 at 1 second / FPS
+									
+						instance.runtime.redraw = true;
+						instance.extra.refresh=0;
 
-						if(instance.extra.refresh >  1 / instance.extra.refresh_rate)
-									{
-									   
-										console.log('refresh');
-										instance.runtime.redraw = true;
-										instance.extra.refresh=0;
-
-									}
+								
 									
 						instance.extra.loading = false;
 					}
@@ -288,7 +283,6 @@ cr.plugins_.SpinePlugin = function(runtime)
 			var anim_dt = dt * 1000 * instance.extra.anim_rate;
 			var anim_time = instance.extra.spine_pose.time;
 			var anim_length = instance.extra.spine_pose.curAnimLength();
-			instance.extra.refresh = instance.extra.refresh + dt; // add dt every tick, then refresh = 1 at 1 second / FPS
 			
 			if (((anim_time + anim_dt) < 0) || ((anim_time + anim_dt) > anim_length))
 				{
@@ -296,14 +290,12 @@ cr.plugins_.SpinePlugin = function(runtime)
 				}
 			instance.extra.spine_pose.update(dt * 1000 * instance.extra.anim_rate);
 
-
-			if(instance.extra.refresh >  1 / instance.extra.refresh_rate)
-			{
-
-				instance.extra.spine_pose.strike();					
+			//console.log(instance.extra.refresh + ' VS ' + instance.extra.refresh_rate);
+			instance.extra.refresh = instance.extra.refresh + dt; // add dt every tick, then refresh = 1 at 1 second / FPS					
+			if( instance.extra.refresh >  1 / instance.extra.refresh_rate )			{		
+				instance.extra.spine_pose.strike();
 				instance.runtime.redraw = true;
 				instance.extra.refresh=0;
-
 			}
 			
 			
