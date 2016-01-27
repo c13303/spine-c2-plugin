@@ -149,7 +149,9 @@ var property_list = [
 	new cr.Property(ept_text,		"Spine Data URL",	"",		"Spine data file from export."),
 	new cr.Property(ept_text,		"Atlas Data URL",	"",		"Atlas data file from export."),
 	new cr.Property(ept_text,		"Skin Key",			"",		"Skin Key"),
-	new cr.Property(ept_text,		"Anim Key",			"",		"Anim Key")
+	new cr.Property(ept_text,		"Anim Key",			"",		"Anim Key"),
+	new cr.Property(ept_text,		"Refresh Rate",		"",		"Refresh Rate"),
+
 	];
 
 // Called by IDE when a new object type is to be created

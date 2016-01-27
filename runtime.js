@@ -59,6 +59,7 @@ cr.plugins_.SpinePlugin = function(runtime)
 
 		instance.extra.anim_rate = 1.0;
 		instance.extra.loop_count = 0;
+		instance.extra.refresh= 0;
 
 		var gl = this.runtime.gl;
 		if (gl)
@@ -79,14 +80,18 @@ cr.plugins_.SpinePlugin = function(runtime)
 		var atlas_url = instance.properties[1] || "";
 		var skin_key = instance.properties[2] || "";
 		var anim_key = instance.properties[3] || "";
+	    var refresh_rate = instance.properties[4] || "";
+
 		console.log("Spine Data URL", spine_url);
 		console.log("Atlas Data URL", atlas_url);
 		console.log("Skin Key", skin_key);
 		console.log("Anim Key", anim_key);
+		console.log("Refresh Rate", refresh_rate);
 
 		instance.extra.loading = true;
 		instance.extra.spine_pose = null;
 		instance.extra.atlas_data = null;
+		instance.extra.refresh_rate = refresh_rate;
 
 		loadText(spine_url, function (err, text)
 		{
@@ -138,8 +143,20 @@ cr.plugins_.SpinePlugin = function(runtime)
 						{
 							instance.extra.render_ctx2d.loadPose(instance.extra.spine_pose, instance.extra.atlas_data, images);
 						}
+						
+						var dt = instance.runtime.getDt(this);
 
-						instance.runtime.redraw = true;
+						instance.extra.refresh = instance.extra.refresh + dt; // add dt every tick, then refresh = 1 at 1 second / FPS
+
+						if(instance.extra.refresh >  1 / instance.extra.refresh_rate)
+									{
+									   
+										console.log('refresh');
+										instance.runtime.redraw = true;
+										instance.extra.refresh=0;
+
+									}
+									
 						instance.extra.loading = false;
 					}
 				}
@@ -232,6 +249,11 @@ cr.plugins_.SpinePlugin = function(runtime)
 		{
 			instance.extra.atlas_data = null;
 		}
+		
+		if (instance.extra.refresh)
+		{
+			instance.extra.refresh = null;
+		}
 	};
 
 	// called when saving the full state of the game
@@ -266,19 +288,33 @@ cr.plugins_.SpinePlugin = function(runtime)
 			var anim_dt = dt * 1000 * instance.extra.anim_rate;
 			var anim_time = instance.extra.spine_pose.time;
 			var anim_length = instance.extra.spine_pose.curAnimLength();
+			instance.extra.refresh = instance.extra.refresh + dt; // add dt every tick, then refresh = 1 at 1 second / FPS
+			
 			if (((anim_time + anim_dt) < 0) || ((anim_time + anim_dt) > anim_length))
-			{
-				++instance.extra.loop_count;
-			}
+				{
+					++instance.extra.loop_count;
+				}
 			instance.extra.spine_pose.update(dt * 1000 * instance.extra.anim_rate);
-			instance.extra.spine_pose.strike();
-			instance.runtime.redraw = true;
+
+
+			if(instance.extra.refresh >  1 / instance.extra.refresh_rate)
+			{
+
+				instance.extra.spine_pose.strike();					
+				instance.runtime.redraw = true;
+				instance.extra.refresh=0;
+
+			}
+			
+			
 		}
 	}
 
 	// only called if a layout object - draw to a canvas 2D context
 	instanceProto.draw = function(ctx)
 	{
+		console.log('2D context');
+
 		var instance = this;
 
 		if (ctx !== this.runtime.ctx)
@@ -355,6 +391,8 @@ cr.plugins_.SpinePlugin = function(runtime)
 
 			instance.extra.render_webgl.drawPose(instance.extra.spine_pose, instance.extra.atlas_data);
 
+			
+			
 			/// resume glwrap
 
 			// the Spine renderer might change this
