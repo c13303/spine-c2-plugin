@@ -516,11 +516,15 @@ cr.plugins_.SpinePlugin = function(runtime)
 	Acts.prototype.SetAnim = function (anim_key)
 	{
 		var instance = this;
-		if (anim_key !== instance.extra.spine_pose.anim_key)
+		if(instance.extra.spine_pose!=null)
 		{
-			instance.extra.spine_pose.setAnim(anim_key);
-			instance.extra.loop_count = 0;
+			if (anim_key !== instance.extra.spine_pose.anim_key)
+			{
+				instance.extra.spine_pose.setAnim(anim_key);
+				instance.extra.loop_count = 0;
+			}
 		}
+		
 	}
 
 	Acts.prototype.SetPrevAnim = function ()
